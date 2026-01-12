@@ -142,11 +142,17 @@ abstract class GameBaseNotifier extends StateNotifier<GameState> {
 
   List<int> _truePossibleMoves(int index){
     ChessPiece? piece = state.board[index];
+    if(piece == null) return [];
+    List<int> moves = piece.getPossibleMoves(index, state);
+
+    if(state.config.onlyRegicide){
+      if(piece.type == 'king') moves.addAll(_possibleCastling());
+      return moves;
+    }
+
     List<ChessPiece?> draw = List<ChessPiece?>.of(state.board);
     List<int> kings = List<int>.of(state.kings);
 
-    if(piece == null) return [];
-    List<int> moves = piece.getPossibleMoves(index, state);
 
     for(int move in List<int>.of(moves)){ //перебираю каждый возможный ход    без учета enPassant и рокировки
       ChessPiece? temp = draw[move];
@@ -297,6 +303,15 @@ class OfflineGameNotifier extends GameBaseNotifier {
       _makeCastling(toIndex);
       return true;
     }
+    if(board[toIndex] != null && board[toIndex]!.type == 'king'){
+      int killPlayer = board[toIndex]!.owner;
+      for(int i = 0; i < board.length; i++){
+        if(board[i] != null && board[i]!.owner == killPlayer){
+          board[i] = board[i]!.kill();
+        }
+      }
+      state = state.copyWith(board: board, killPlayer: killPlayer);
+    }
 
     board[fromIndex] = null;
     switch (piece.type) {
@@ -373,6 +388,16 @@ class OfflineGameNotifier extends GameBaseNotifier {
 
   @override
   Stalemate? checkmate() {
+    //проверка для режима цареубийство
+    if(state.config.onlyRegicide){
+      for(int index = 0; index < state.board.length; index++){
+        if(state.board[index]!=null && state.board[index]!.owner == state.currentPlayer && state.board[index]!.getPossibleMoves(index, state).isNotEmpty){
+          return null;
+        }
+      }
+      return Stalemate.skipMove;
+    }
+    //проверка для остального режима
     List<ChessPiece?> board = List<ChessPiece?>.of(state.board);
     List<int> kings = List<int>.of(state.kings);
     //перебираем каждый возможный ход

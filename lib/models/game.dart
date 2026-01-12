@@ -64,7 +64,7 @@ class GameState {
     );
   }
 
-  GameState copyWith({List<ChessPiece?>? board, int? selectedIndex, List<int>? availableMoves,
+  GameState copyWith({List<ChessPiece?>? board, int? selectedIndex, List<int>? availableMoves, int? killPlayer,
     int? currentPlayer, int? newPlacementOfKing, bool? currentPlayerAlive, Map<int, List<int>>? enPassant, GameStatus? status, int? promotionPawn}){
     return GameState(
       board: board ?? this.board,
@@ -72,7 +72,7 @@ class GameState {
       availableMoves: availableMoves ?? this.availableMoves,
       currentPlayer: currentPlayer ?? this.currentPlayer,
       kings: _updateKing(newPlacementOfKing),
-      alive: _updateAlive(currentPlayerAlive),
+      alive: _updateAlive(currentPlayerAlive, killPlayer),
       enPassant: _updateEnPassant(enPassant),
       commands: commands,
       status: status ?? this.status,
@@ -128,12 +128,10 @@ class GameState {
     return newKings;
   }
 
-  List<bool> _updateAlive(bool? currentPlayerAlive) {
-    if(currentPlayerAlive == null){
-      return alive;
-    }
+  List<bool> _updateAlive(bool? currentPlayerAlive, int? killPlayer) {
     List<bool> newAlive = List<bool>.of(alive);
-    newAlive[currentPlayer] = currentPlayerAlive;
+    if(currentPlayerAlive != null) newAlive[currentPlayer] = currentPlayerAlive;
+    if(killPlayer != null) newAlive[killPlayer] = false;
     return newAlive;
   }
 
