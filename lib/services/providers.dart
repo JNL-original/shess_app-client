@@ -13,13 +13,7 @@ final boardOnlineProvider = StateNotifierProvider.family<OnlineGameNotifier, Gam
   return OnlineGameNotifier(config);
 });
 
-final offlineConfigProvider = Provider<OfflineConfig>((ref) {
-  return OfflineConfig(playerColors: {
-    -1: Colors.grey,
-    0: Colors.yellow,
-    1: Colors.blue,
-    2: Colors.red,
-    3: Colors.green,
-  });
+final offlineConfigProvider = StateProvider<OfflineConfig>((ref) {
+  return OfflineConfig();
 });
 

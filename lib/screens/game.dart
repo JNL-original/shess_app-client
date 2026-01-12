@@ -4,17 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../configs/config.dart';
 import '../models/chess_piece.dart';
 import '../services/providers.dart';
 
 class GameScreen extends ConsumerWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, required this.onlineMode, this.id});
+  final bool onlineMode;
+  final String? id;
 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.onPrimaryFixed,
+        title: Text("Шахматы на 4-х", style: Theme.of(context).textTheme.displayLarge,),
+      ),
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -34,7 +40,8 @@ class GameScreen extends ConsumerWidget {
             _boardView()       // критерий что жив  state.alive.fold(0, (prev, alive) => prev + (alive ? 1 : 0)) > 1
           ],
         ),
-      );
+      )
+    );
   }
 
   Widget _boardView(){
