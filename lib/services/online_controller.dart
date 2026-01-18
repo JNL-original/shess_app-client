@@ -228,7 +228,9 @@ class OnlineGame extends _$OnlineGame with GameBaseNotifier{
       aliveList: alive,
       kings: kings,
       board: board,
-      turn: data['turn']
+      turn: data['turn'],
+      selectedIndex: -1,
+      availableMoves: []
     );
   }
 }
