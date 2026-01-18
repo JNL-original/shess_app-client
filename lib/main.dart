@@ -58,21 +58,25 @@ final _router = GoRouter(
       }
     ),
     GoRoute(
-      path: '/online',
-      builder: (context, state) => const RoomsScreen(),
-      routes: [
-        GoRoute(
-          path: 'config',
-            builder: (context, state) => const ConfigScreen(onlineMode: true)
-        ),
-        GoRoute(
-            path: ':id',
-            builder: (context, state) {
-              final String? id = state.pathParameters['id'];
-              return GameScreen(onlineMode: true, id: id);
-            },
-        ),
-      ]
+      path: '/online/:id',
+      builder: (context, state) {
+        final String? id = state.pathParameters['id'];
+        return GameScreen(onlineMode: true, id: id);
+      },
+      // builder: (context, state) => const RoomsScreen(),
+      // routes: [
+      //   GoRoute(
+      //     path: 'config',
+      //       builder: (context, state) => const ConfigScreen(onlineMode: true)
+      //   ),
+      //   GoRoute(
+      //       path: ':id',
+      //       builder: (context, state) {
+      //         final String? id = state.pathParameters['id'];
+      //         return GameScreen(onlineMode: true, id: id);
+      //       },
+      //   ),
+      // ]
     ),
   ],
 );
