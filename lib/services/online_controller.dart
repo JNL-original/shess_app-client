@@ -169,8 +169,13 @@ class OnlineGame extends _$OnlineGame with GameBaseNotifier{
         ) ?? {-1: Colors.grey, 0: Colors.yellow, 1: Colors.blue, 2: Colors.red, 3: Colors.green};
         colors = parsedColors;
       }
-      final names = data['names'];//Уже в удобном виде
+      Map<int, String>? names;
+      if (data['names'] != null) {
+        final Map<String, dynamic> rawNames = data['names'];
+        names = rawNames.map((key, value) => MapEntry(int.parse(key), value.toString()));
+      }
       config = config.copyWith(colors: colors, names: names);
+
       final statusString = data['status'];
       GameStatus? status;
       if(statusString != null) {
