@@ -64,6 +64,10 @@ class OnlineGame extends _$OnlineGame with GameBaseNotifier{
           state = state.copyWith(aliveList: aliveList);
         }
       }
+      else if(data['type'] == 'notExist'){
+        state = state.copyWith(status: GameStatus.notExist);
+        channel.sink.close(1000);
+      }
       else{
         if(data['turn'] == null || data['turn']!= state.turn + 1) {channel.sink.add(jsonEncode({'type': 'connect'}));}
         else{
@@ -72,9 +76,6 @@ class OnlineGame extends _$OnlineGame with GameBaseNotifier{
               _handleLobby(data);
             case 'update':
               _handleUpdate(data);
-            case 'notExist':
-              state = state.copyWith(status: GameStatus.notExist);
-              channel.sink.close(1000);
             default:
               channel.sink.add(jsonEncode({'type': 'connect'}));
           }
