@@ -58,7 +58,7 @@ final class OnlineGameProvider
   }
 }
 
-String _$onlineGameHash() => r'a2f0eb703c312b4e49ab4aad8fb21ee2ea83bbcc';
+String _$onlineGameHash() => r'8b1874544e9c29942882245c01fda0dc58299f4e';
 
 final class OnlineGameFamily extends $Family
     with

@@ -51,24 +51,27 @@ class ConfigScreen extends ConsumerWidget{
                                 context.go("/offline");
                               }
                               else{
-                                final OnlineConfig config = OnlineConfig();
-                                final channel = await ref.read(webSocketProvider('new').future);
-                                late StreamSubscription sub;
-                                sub = channel.stream.listen((message) {
-                                  final data = jsonDecode(message);
-                                  if (data['type'] == 'new_room') {
-                                    final String newRoomId = data['roomId'];
-                                    sub.cancel();
-                                    context.go('/online/$newRoomId');
-                                    Future.delayed(Duration(milliseconds: 100), () {
-                                      channel.sink.close(1000);
-                                    });
-                                  }
-                                });
-                                channel.sink.add(jsonEncode({
-                                  'type': 'create',
-                                  'config': config.toMap(),
-                                }));
+                                  final config = OnlineConfig();
+                                  final subscription = ref.listenManual(
+                                    webSocketProvider('new'),
+                                        (previous, next) {
+                                      next.whenData((channel) {
+                                        channel.stream.listen((message) {
+                                          final data = jsonDecode(message);
+                                          if (data['type'] == 'new_room') {
+                                            final String newRoomId = data['roomId'];
+                                            if (context.mounted) Navigator.pop(context);
+                                            context.go('/online/$newRoomId');
+                                          }
+                                        });
+                                        channel.sink.add(jsonEncode({
+                                          'type': 'create',
+                                          'config': config.toMap(),
+                                        }));
+                                      });
+                                    },
+                                    fireImmediately: true,
+                                  );
                               }
                             },
                             child: Text("Создать игру")

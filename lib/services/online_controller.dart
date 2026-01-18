@@ -17,35 +17,49 @@ part 'online_controller.g.dart';
 
 @riverpod
 class OnlineGame extends _$OnlineGame with GameBaseNotifier{
+  StreamSubscription? _socketSubscription;
 
   @override
   GameState build(String roomId) {
-    final socketAsync = ref.watch(webSocketProvider(roomId));
+    print("--- Начался метод build ---");
+    ref.listen(webSocketProvider(roomId), (previous, next) {
+      next.whenData((channel) {
+        _setupSubscription(channel);
+      });
+    });
 
-    return socketAsync.when(
-      data: (channel) {
-        final subscription = _subscript(channel);
-        ref.onDispose(() => subscription.cancel());
+    final socketAsync = ref.read(webSocketProvider(roomId));
+    if (socketAsync.hasValue) {
+      Future.microtask(() => _setupSubscription(socketAsync.value!));
+    }
+    ref.onDispose(() {
+      _socketSubscription?.cancel();
+    });
+    print("--- Возвращаю начальное состояние ---");
+    return GameState.initial(OnlineConfig()).copyWith(status: GameStatus.connecting);
+  }
 
-        channel.sink.add(jsonEncode({'type': 'connect'}));
-
-        return GameState.initial(OnlineConfig()).copyWith(status: GameStatus.connecting);
-      },
-      loading: () => GameState.initial(OnlineConfig()).copyWith(status: GameStatus.connecting),
-      error: (err, stack) => GameState.initial(OnlineConfig()).copyWith(status: GameStatus.connecting),
-    );
+  void _setupSubscription(WebSocketChannel channel) {
+    if (_socketSubscription != null) return;
+    _socketSubscription = _subscript(channel);
+    channel.sink.add(jsonEncode({'type': 'connect'}));
+    print("--- CONNECT отправлен ---");
   }
 
   StreamSubscription<dynamic> _subscript(channel) {
+    print("--- УСТАНОВЛЕНА ПОДПИСКА НА СТРИМ ---");
     return channel.stream.listen((message) {
+      print("--- ПОЛУЧЕННО СООБЩЕНИЕ ---");
+      print(message);
       final data = jsonDecode(message);
+      if (!ref.mounted) return;
       if (data['type'] == 'sync') {
         state = GameState.fromMap(data['data']);
         final readyList = data['ready'];
         if(readyList != null){
           List<bool?> aliveList = state.alive;
           for( int i = 0; i < 4; i ++){
-              aliveList[i] = readyList[i];//если null то пустое место
+              aliveList[i] = readyList[i.toString()];//если null то пустое место
           }
           state = state.copyWith(aliveList: aliveList);
         }
